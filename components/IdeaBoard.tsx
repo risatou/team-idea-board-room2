@@ -6,19 +6,28 @@ import { IdeaCard } from "@/components/IdeaCard";
 import { IdeaForm } from "@/components/IdeaForm";
 import { IdeaSummary } from "@/components/IdeaSummary";
 import { initialIdeas } from "@/data/ideas";
-import { categories, type CategoryFilterValue, type IdeaDraft } from "@/types/idea";
+import {
+  categories,
+  noCategorySelected,
+  type CategorySelection,
+  type IdeaDraft,
+} from "@/types/idea";
 
 export function IdeaBoard() {
   const [ideas, setIdeas] = useState(initialIdeas);
-  const [activeCategory, setActiveCategory] = useState<CategoryFilterValue>("すべて");
+  const [activeCategory, setActiveCategory] =
+    useState<CategorySelection>(noCategorySelected);
 
-  const visibleIdeas = useMemo(
-    () =>
-      activeCategory === "すべて"
-        ? ideas
-        : ideas.filter((idea) => idea.category === activeCategory),
-    [activeCategory, ideas],
-  );
+  const hasSelectedCategory = activeCategory !== noCategorySelected;
+
+  const visibleIdeas = useMemo(() => {
+    if (!hasSelectedCategory) {
+      return [];
+    }
+    return activeCategory === "すべて"
+      ? ideas
+      : ideas.filter((idea) => idea.category === activeCategory);
+  }, [activeCategory, hasSelectedCategory, ideas]);
 
   const addIdea = (draft: IdeaDraft) => {
     setIdeas((currentIdeas) => [
@@ -72,7 +81,9 @@ export function IdeaBoard() {
               <p className="eyebrow">IDEA LIST</p>
               <h2 id="board-heading">みんなの改善アイデア</h2>
             </div>
-            <span className="idea-count">{visibleIdeas.length}件を表示</span>
+            <span className="idea-count">
+              {hasSelectedCategory ? `${visibleIdeas.length}件を表示` : "カテゴリ未選択"}
+            </span>
           </div>
 
           <CategoryFilter
@@ -82,7 +93,12 @@ export function IdeaBoard() {
           />
 
           <div className="idea-list" aria-live="polite">
-            {visibleIdeas.length > 0 ? (
+            {!hasSelectedCategory ? (
+              <div className="empty-state">
+                <strong>表示するカテゴリを選んでください</strong>
+                <p>上のリストからカテゴリを選ぶと、そのアイデアが表示されます。</p>
+              </div>
+            ) : visibleIdeas.length > 0 ? (
               visibleIdeas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)
             ) : (
               <div className="empty-state">

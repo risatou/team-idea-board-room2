@@ -2,6 +2,9 @@ export const categories = ["業務効率化", "顧客対応", "働き方"] as co
 
 export type Category = (typeof categories)[number];
 export type CategoryFilterValue = "すべて" | Category;
+/** カテゴリ未選択の状態を表す値 */
+export const noCategorySelected = "" as const;
+export type CategorySelection = typeof noCategorySelected | CategoryFilterValue;
 
 export type Idea = {
   id: string;
